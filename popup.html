@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>GTmetrix Analyzer</title>
+    <meta charset="utf-8">
+    <link rel="stylesheet" type="text/css" href="./styles/style.css" />
+    <link href="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <link href="https://fonts.googleapis.com/css?family=Roboto&display=swap" rel="stylesheet">
+  </head>
+  <body>
+    <div class="header">
+      <div class="categories">
+        <div class="category congratTextsCategory">
+          Text
+        </div>
+        <div class="category dontSendCategory">
+          Don't send
+        </div>
+      </div>
+    </div>
+    <div class="congratTextsContent">
+      <div class="inputs">
+        <div class="input-content">
+          <div class="mdc-text-field mdc-text-field--fullwidth">
+            <input 
+              class="mdc-text-field__input congrat-text"
+              type="text"
+              placeholder="Hint text"
+            >
+          </div>
+          <img src="./assets/cancel-icon.svg" class="remove-button" alt="cancel-icon" />
+        </div>
+      </div>
+      <div class='buttons-content'>
+        <button id="addInput" class="mdc-fab">
+          <div class="mdc-fab__ripple"></div>
+          <span class="mdc-fab__icon material-icons">add</span>
+        </button>
+        <button id="set">Done!</button>
+      </div>
+    </div>
+    <div class="dont-send-content">
+      <div class="mdc-text-field mdc-text-field--fullwidth">
+        <input 
+          class="mdc-text-field__input dont-send-input"
+          type="text"
+          placeholder="Hint text"
+        >
+      </div>
+      <img src="../assets/add-icon.svg" alt="add-icon" class="add-user-icon" />
+      <div class="users-content"></div>
+    </div>
+    <script type="text/javascript" src="popup.js"></script>
+  </body>
+</html>

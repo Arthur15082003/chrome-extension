@@ -1,0 +1,187 @@
+@import "@material/textfield/mdc-text-field";
+@import url('https://fonts.googleapis.com/css?family=Roboto&display=swap');
+
+@font-face {
+  font-family: 'Roboto';
+  font-style: normal;
+  font-weight: 400;
+  src: url(https://fonts.gstatic.com/s/roboto/v20/KFOmCnqEu92Fr1Mu72xKKTU1Kvnz.woff2) format('woff2');
+}
+
+body {
+  background-color: none;
+  font-family: 'Roboto', sans-serif !important;
+  min-width: 200px;
+  min-height: 235px;
+  background: #FFFFFF;
+  opacity: 0.85;
+  -webkit-border-radius: 10px !important;
+  padding: 18px 12px 18px 20px !important;
+}
+
+.categories {
+  margin-bottom: 25px;
+  display: flex;
+  justify-content: space-around;
+  font-size: 15px;
+}
+
+.category {
+  cursor: pointer;
+}
+
+.congratTextsCategory {
+  font-weight: bold;
+  color: #000;
+}
+
+.dontSendCategory {
+  font-weight: normal;
+  opacity: .56;
+}
+
+.congratTextsContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 5px;
+}
+
+#addInput {
+  width: 30px;
+  height: 30px;
+}
+
+.input-content {
+  display: flex;
+  align-items: center;
+  margin-top: 10px;
+}
+
+.remove-button {
+  height: 10px;
+  width: 10px;
+  cursor: pointer;
+}
+
+.mdc-text-field {
+  height: 30px !important;
+}
+
+.mdc-text-field__input {
+  caret-color: #009688 !important;
+  color: rgba(0,0,0,1) !important;
+}
+
+.mdc-text-field__input:focus{
+  border-bottom: #009688 2px solid !important;
+}
+
+#set {
+  color: #009688;
+  outline: none;
+  border: none; 
+  font-style: normal;
+  font-weight: 500;
+  font-size: 16px;
+  margin-left: 100px;
+  cursor: pointer;
+}
+
+.buttons-content {
+  margin-top: 18px;
+  display: flex;
+  align-items: center;
+}
+
+.dont-send-content {
+  display: none;
+  position: relative !important;
+}
+
+.add-user-icon {
+  position: absolute;
+  top: 3px;
+  right: 0;
+  width: 15px;
+  height: 15px;
+  cursor: pointer;
+}
+
+.add-icon {
+  position: absolute !important;
+  top: 3px;
+  right: -6px;
+  height: 20px;
+  width: 20px;
+  cursor: pointer;
+}
+
+.dont-send-input {
+  padding-right: 18px !important;
+}
+
+.users-content {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-top: 21px;
+  text-align: center;
+}
+
+.user-content {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  width: 65px;
+  text-align: center;
+  padding-bottom: 20px;
+  align-items: center;
+  position: relative;
+}
+
+.image-content {
+  display: flex;
+  align-items: flex-start;
+}
+
+.user-content:hover {
+  padding-bottom: 15px;
+}
+
+.user-content:hover .dont-send-user-image {
+  width: 45px;
+  height: 45px;
+  box-shadow: 0px 1px 3px #C4C4C4;
+}
+
+.user-name {
+  position: absolute;
+  bottom: 0;
+  display: none;
+  font-size: 10px;
+  width: 100px;
+}
+
+.user-remove-icon {
+  display: none;
+  position: absolute;
+  top: 0;
+  right: 0;
+  cursor: pointer;
+}
+
+.user-content:hover .user-remove-icon {
+  display: block;
+}
+
+.user-content:hover .user-name {
+  display: block;
+}
+
+.dont-send-user-image {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+}
