@@ -123,7 +123,7 @@ document.getElementById('set').addEventListener('click', () => {
   const today = chrome.extension.getBackgroundPage().getTodayData();
   const { dateToday } = today;
   chrome.storage.local.get('sendedDate', async (e) => {
-    if (e.sendedDate !== dateToday) {
+    if (!Object.keys(e).length || e.sendedDate !== dateToday) {
       await chrome.extension.getBackgroundPage().createNotification();
       chrome.storage.local.set({'sendedDate': dateToday});
     }

@@ -100,46 +100,44 @@ function congratTimeOut() {
 }
 
 async function createNotification() {
-  await fetchBirthdays();
   if (hourNow >= 1 && hourNow <= 8) {
     chrome.storage.local.get('sendedDate', (e) => {
-      if (e) {
-        if (dateToday !== e.sendedDate) {
-          chrome.storage.local.get('congratTexts', (t) => {
-            if (!!Object.keys(t).length && !!t.congratTexts.length) {
-              let message;
-              if (!!neededNames.length) {
-                if (neededNames.length > 1) {
-                  message = `Today ${neededNames[0]}'s and ${neededNames.length - 1} more birthdays`;  
-                } else {
-                  message = `Today ${neededNames[0]}'s birthday`;
-                }
+      if (!Object.keys(e).length || dateToday !== e.sendedDate) {
+        chrome.storage.local.get('congratTexts', (t) => {
+          if (!!Object.keys(t).length && !!t.congratTexts.length) {
+            let message;
+            if (!!neededNames.length) {
+              if (neededNames.length > 1) {
+                message = `Today ${neededNames[0]}'s and ${neededNames.length - 1} more birthdays`;  
               } else {
-                message = `Today you have no birthdays`;
+                message = `Today ${neededNames[0]}'s birthday`;
               }
-
-              chrome.notifications.create(
-                'notification', {   
-                  type: 'basic', 
-                  title: "Facebook extension!!!", 
-                  iconUrl: "./assets/icon.png",
-                  message,
-                  buttons: [
-                    { title: 'congrat now'},
-                    { title: 'congrat after 15 minutes' },
-                  ],
-                  requireInteraction: true,
-                }
-              );
+            } else {
+              message = `Today you have no birthdays`;
             }
-          })
-        }
+
+            chrome.notifications.create(
+              'notification', {   
+                type: 'basic', 
+                title: "Facebook extension!!!", 
+                iconUrl: "./assets/icon.png",
+                message,
+                buttons: [
+                  { title: 'congrat now'},
+                  { title: 'congrat after 15 minutes' },
+                ],
+                requireInteraction: true,
+              }
+            );
+          }
+        })
       }
     })
   }
 }
 window.addEventListener('load', async () => {
-  await createNotification();
+  await fetchBirthdays();
+  createNotification();
   chrome.notifications.onClosed.addListener(() => {
     chrome.notifications.clear('notification');
     congratTimeOut();
