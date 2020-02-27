@@ -13,7 +13,7 @@ const addInput = (value) => {
   let inputElement = document.createElement("input");
   inputElement.setAttribute('class', "mdc-text-field__input congrat-text");
   inputElement.setAttribute("type", "text");
-  inputElement.setAttribute("placeholder", "Hint text")
+  inputElement.setAttribute("placeholder", "Congratulations text")
   if (value) {
     inputElement.setAttribute("value", value);
   }
@@ -122,9 +122,9 @@ document.getElementById('set').addEventListener('click', () => {
   chrome.storage.local.set({congratTexts: inputValues});
   const today = chrome.extension.getBackgroundPage().getTodayData();
   const { dateToday } = today;
-  chrome.storage.local.get('sendedDate', (e) => {
+  chrome.storage.local.get('sendedDate', async (e) => {
     if (e.sendedDate !== dateToday) {
-      chrome.extension.getBackgroundPage().congrat();
+      await chrome.extension.getBackgroundPage().createNotification();
       chrome.storage.local.set({'sendedDate': dateToday});
     }
   });
@@ -133,7 +133,8 @@ document.getElementById('set').addEventListener('click', () => {
 window.addEventListener('load', () => {
   chrome.storage.local.get('congratTexts', (e) => {
     const { congratTexts } = e;
-    if (!!congratTexts.length) {
+
+    if (!!Object.keys(e).length && !!congratTexts.length) {
       const firstInputElement = document.getElementsByClassName('congrat-text')[0];
       firstInputElement.value = congratTexts[0];
       for (let i = 1; i < congratTexts.length; i++) {
@@ -165,12 +166,14 @@ dontSendCategory.addEventListener('click', () => {
   congratTextsContent.style.display = 'none';
 })
 
-document.getElementsByClassName('add-user-icon')[0].addEventListener('click', () => {
+document.getElementsByClassName('add-user-icon')[0].addEventListener('click', async () => {
   let url = '' + document.getElementsByClassName('dont-send-input')[0].value;
   if (url) {
     url = url.replace("www.facebook.com", "m.facebook.com");
-    fetch(url).then((response) => {
-      response.text().then(t => {
+    let response = await fetch(url);
+    if (response) {
+      t = await response.text();
+      if (t) {
         let name = t.split('<title>')[1];
         if (name) {
           name = name.split('<')[0];
@@ -220,11 +223,12 @@ document.getElementsByClassName('add-user-icon')[0].addEventListener('click', ()
               ...user
             }
           }
+          document.getElementsByClassName('dont-send-input')[0].value = '';
           chrome.storage.local.set({dontSendUsers}, () => {
             setDontSendUsers();
           })
         })
-      })
-    })
+      }
+    }
   }
 })

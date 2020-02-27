@@ -73,6 +73,10 @@ body {
   color: rgba(0,0,0,1) !important;
 }
 
+.mdc-text-field__input {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.12) !important;
+}
+
 .mdc-text-field__input:focus{
   border-bottom: #009688 2px solid !important;
 }

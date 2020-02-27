@@ -1,4 +1,4 @@
-const neededIds = [];
+let neededIds = [];
 let neededNames = [];
 const today = getTodayData();
 const { dateToday, hourNow } = today;
@@ -43,16 +43,41 @@ async function fetchBirthdays() {
   }
 }
 
-function congrat() {
-  chrome.storage.local.get('dontSendUsers', (e) => {
-    for (let neededId of neededUsers) {
-      if (!Object.keys(e).length || !e.dontSendUsers[neededId]) {
-        chrome.tabs.create({ url: `https://m.facebook.com/messages/compose?ids=${neededId}`, active: false }, (tab) => {
-          chrome.tabs.executeScript(tab.id, {file: './magic.js'});
-        });
+function asyncCreateTab(tabProps) {
+  return new Promise((resolve) => {
+    chrome.tabs.create(tabProps, (tab) => {
+      if (!chrome.runtime.lastError) {
+        resolve(tab);
       }
-    }
+    })
   })
+}
+
+function asyncTimeOut(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+async function congrat(index) {
+  if (!!neededIds.length) {
+    chrome.storage.local.get('dontSendUsers', async (e) => {
+      if (!Object.keys(e).length || !e.dontSendUsers[neededIds[index]]) {
+        let tab = await asyncCreateTab({ url: `https://m.facebook.com/messages/compose?ids=${neededIds[index]}`, active: false });
+        if (tab) {
+          chrome.tabs.executeScript(tab.id, {file: './magic.js'}, () => {
+            chrome.runtime.onMessage.addListener(async function listener(res) {
+              if (res === 'clicked') {
+                await asyncTimeOut(3 * 1000);
+                chrome.runtime.onMessage.removeListener(listener);
+                chrome.tabs.remove(tab.id);
+                if (index + 1 < neededIds.length) {
+                  congrat(++index);
+                }
+              }
+            })
+          });
+        }
+      }
+    })
+  }
 }
 
 function getTodayData() {
@@ -66,15 +91,15 @@ function getTodayData() {
 }
 
 function congratTimeOut() {
-  if (neededNames) {
+  if (!!neededIds.length) {
     setTimeout(() => {
       chrome.storage.local.set({sendedDate: dateToday});
-      congrat();
+      congrat(0);
     }, congratAfterMinutes * 60 * 1000);
   }
 }
 
-window.addEventListener('load', async () => {
+async function createNotification() {
   await fetchBirthdays();
   if (hourNow >= 1 && hourNow <= 8) {
     chrome.storage.local.get('sendedDate', (e) => {
@@ -97,7 +122,7 @@ window.addEventListener('load', async () => {
                 'notification', {   
                   type: 'basic', 
                   title: "Facebook extension!!!", 
-                  iconUrl: "./assets/cancel-icon.svg",
+                  iconUrl: "./assets/icon.png",
                   message,
                   buttons: [
                     { title: 'congrat now'},
@@ -112,6 +137,9 @@ window.addEventListener('load', async () => {
       }
     })
   }
+}
+window.addEventListener('load', async () => {
+  await createNotification();
   chrome.notifications.onClosed.addListener(() => {
     chrome.notifications.clear('notification');
     congratTimeOut();
@@ -129,9 +157,5 @@ window.addEventListener('load', async () => {
     }
     chrome.notifications.clear(noteId);
     congratTimeOut();
-  })  
-  
+  }) 
 })
-// chrome.storage.local.remove('sendedDate');
-
-// chrome.storage.local.remove('dontSendUsers');
