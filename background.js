@@ -2,7 +2,7 @@ let neededIds = [];
 let neededNames = [];
 const today = getTodayData();
 const { dateToday, hourNow } = today;
-let congratAfterMinutes = 5;
+let congratAfterMinutes;
 
 async function fetchBirthdays() {
   let response = await fetch('https://www.facebook.com/events/calendar/birthdays/');
@@ -29,7 +29,7 @@ async function fetchBirthdays() {
                   neededNames.push(name);
                 }
               }
-              if (id) { 
+              if (id) {
                 id = id.split('&')[0];
                 if (id) {
                   neededIds.push(id);
@@ -91,7 +91,7 @@ function getTodayData() {
 }
 
 function congratTimeOut() {
-  if (!!neededIds.length) {
+  if (!!neededIds.length && congratAfterMinutes) {
     setTimeout(() => {
       chrome.storage.local.set({sendedDate: dateToday});
       congrat(0);
@@ -106,6 +106,10 @@ async function createNotification() {
         chrome.storage.local.get('congratTexts', (t) => {
           if (!!Object.keys(t).length && !!t.congratTexts.length) {
             let message;
+            let buttons = [
+              { title: 'congratulate now!'},
+              { title: 'congratulate after 15 minutes'}
+            ];
             if (!!neededNames.length) {
               if (neededNames.length > 1) {
                 message = `Today ${neededNames[0]}'s and ${neededNames.length - 1} more birthdays`;  
@@ -113,19 +117,17 @@ async function createNotification() {
                 message = `Today ${neededNames[0]}'s birthday`;
               }
             } else {
+              buttons = '';
               message = `Today you have no birthdays`;
             }
 
             chrome.notifications.create(
               'notification', {   
                 type: 'basic', 
-                title: "Facebook extension!!!", 
+                title: "Lazy Friend", 
                 iconUrl: "./assets/icon.png",
                 message,
-                buttons: [
-                  { title: 'congrat now'},
-                  { title: 'congrat after 15 minutes' },
-                ],
+                buttons,
                 requireInteraction: true,
               }
             );
@@ -140,7 +142,6 @@ window.addEventListener('load', async () => {
   createNotification();
   chrome.notifications.onClosed.addListener(() => {
     chrome.notifications.clear('notification');
-    congratTimeOut();
   })
 
   chrome.notifications.onButtonClicked.addListener((noteId, buttonIndex) => {
