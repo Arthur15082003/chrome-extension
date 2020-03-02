@@ -117,7 +117,7 @@ async function createNotification() {
                 message = `Today ${neededNames[0]}'s birthday`;
               }
             } else {
-              buttons = '';
+              buttons = [];
               message = `Today you have no birthdays`;
             }
 
@@ -141,7 +141,15 @@ window.addEventListener('load', async () => {
   await fetchBirthdays();
   createNotification();
   chrome.notifications.onClosed.addListener(() => {
-    chrome.notifications.clear('notification');
+    if (!!neededIds.length) {
+      chrome.notifications.clear('notification');
+    } else {
+      chrome.storage.local.get('sendedDate', (e) => {
+        if (!Object.keys(e).length || dateToday !== e.sendedDate) {
+          chrome.storage.local.set({'sendedDate': dateToday});
+        }
+      })
+    }
   })
 
   chrome.notifications.onButtonClicked.addListener((noteId, buttonIndex) => {
