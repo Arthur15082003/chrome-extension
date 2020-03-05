@@ -5,9 +5,17 @@ const { dateToday, hourNow } = today;
 let congratAfterMinutes;
 
 async function fetchBirthdays() {
-  let response = await fetch('https://www.facebook.com/events/calendar/birthdays/');
+  let response = await fetch('https://www.facebook.com/events/birthdays/');
   if (response) {
     let t = await response.text();
+    if (!t.includes('birthdays-content')) {
+      response = await fetch('https://www.facebook.com/birthdays/');
+      t = await response.text();
+    }
+    if (t.includes('<input type="password"')) {
+      createNotification('facebookLogin');
+      return;
+    }
     if (t) {
       if (t.includes('birthdays_today_card')) {
         let today = t.split('birthdays_today_card')[1];
@@ -39,6 +47,7 @@ async function fetchBirthdays() {
           }
         }
       }
+      createNotification('congrat');
     }
   }
 }
@@ -56,6 +65,7 @@ function asyncCreateTab(tabProps) {
 function asyncTimeOut(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
+
 async function congrat(index) {
   if (!!neededIds.length) {
     chrome.storage.local.get('dontSendUsers', async (e) => {
@@ -91,7 +101,7 @@ function getTodayData() {
 }
 
 function congratTimeOut() {
-  if (!!neededIds.length && congratAfterMinutes) {
+  if (!!neededIds.length) {
     setTimeout(() => {
       chrome.storage.local.set({sendedDate: dateToday});
       congrat(0);
@@ -99,30 +109,40 @@ function congratTimeOut() {
   }
 }
 
-async function createNotification() {
+async function createNotification(noteName) {
   if (hourNow >= 1 && hourNow <= 8) {
     chrome.storage.local.get('sendedDate', (e) => {
       if (!Object.keys(e).length || dateToday !== e.sendedDate) {
         chrome.storage.local.get('congratTexts', (t) => {
           if (!!Object.keys(t).length && !!t.congratTexts.length) {
-            let message;
-            let buttons = [
-              { title: 'congratulate now!'},
-              { title: 'congratulate after 15 minutes'}
-            ];
-            if (!!neededNames.length) {
-              if (neededNames.length > 1) {
-                message = `Today ${neededNames[0]}'s and ${neededNames.length - 1} more birthdays`;  
-              } else {
-                message = `Today ${neededNames[0]}'s birthday`;
-              }
-            } else {
-              buttons = [];
-              message = `Today you have no birthdays`;
+            let message = '';
+            let buttons = [];
+            switch (noteName) {
+              case 'congrat':
+                if (!!neededNames.length) {
+                  if (neededNames.length > 1) {
+                    message = `Today ${neededNames[0]}'s and ${neededNames.length - 1} more birthdays`;
+                    buttons = [
+                      { title: 'congratulate now!'},
+                      { title: 'congratulate after 15 minutes'}
+                    ]; 
+                  } else {
+                    message = `Today ${neededNames[0]}'s birthday`;
+                    buttons = [
+                      { title: 'congratulate now!'},
+                      { title: 'congratulate after 15 minutes'}
+                    ];
+                  }
+                } else {
+                  message = `Today you have no birthdays`;
+                }
+                break;
+              case 'facebookLogin':
+                message = 'Please login to facebook then reload the extension';
             }
 
             chrome.notifications.create(
-              'notification', {   
+              noteName, {   
                 type: 'basic', 
                 title: "Lazy Friend", 
                 iconUrl: "./assets/icon.png",
@@ -138,20 +158,29 @@ async function createNotification() {
   }
 }
 window.addEventListener('load', async () => {
-  await fetchBirthdays();
-  createNotification();
-  chrome.notifications.onClosed.addListener(() => {
-    if (!!neededIds.length) {
-      chrome.notifications.clear('notification');
-    } else {
-      chrome.storage.local.get('sendedDate', (e) => {
-        if (!Object.keys(e).length || dateToday !== e.sendedDate) {
-          chrome.storage.local.set({'sendedDate': dateToday});
-        }
-      })
+  chrome.storage.local.get('congratTexts', async (e) => {
+    if (!!Object.keys(e).length && !!e.congratTexts.length) {
+      await fetchBirthdays();
     }
   })
+  chrome.notifications.onClosed.addListener((noteId) => {
+    switch (noteId) {
+      case 'congrat':
+        if (!!neededIds.length) {
+          chrome.notifications.clear(noteId);
+        } else {
+          chrome.storage.local.get('sendedDate', (e) => {
+            if (!Object.keys(e).length || dateToday !== e.sendedDate) {
+              chrome.storage.local.set({'sendedDate': dateToday});
+              chrome.notifications.clear(noteId);
+            }
+          })
+        }
+      case 'facebookLogin':
+        chrome.notifications.clear(noteId); 
+    }
 
+  })
   chrome.notifications.onButtonClicked.addListener((noteId, buttonIndex) => {
     if (noteId = 'congrat') {
       switch (buttonIndex) {
@@ -161,8 +190,9 @@ window.addEventListener('load', async () => {
         case 1:
           congratAfterMinutes = 15;
       }
+      congratTimeOut();
     }
     chrome.notifications.clear(noteId);
-    congratTimeOut();
+    
   }) 
 })

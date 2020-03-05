@@ -37,6 +37,10 @@ document.getElementById('addInput').addEventListener('click', () => {
   addInput(undefined);
 })
 
+document.getElementsByClassName('reload')[0].addEventListener('click', () => {
+  chrome.runtime.reload();
+});
+
 const setDontSendUsers = () => {
   chrome.storage.local.get('dontSendUsers', (e) => {
     const { dontSendUsers } = e;
@@ -124,8 +128,7 @@ document.getElementById('set').addEventListener('click', () => {
   const { dateToday } = today;
   chrome.storage.local.get('sendedDate', async (e) => {
     if (!Object.keys(e).length || e.sendedDate !== dateToday) {
-      await chrome.extension.getBackgroundPage().createNotification();
-      chrome.storage.local.set({'sendedDate': dateToday});
+      await chrome.extension.getBackgroundPage().fetchBirthdays();
     }
   });
 })

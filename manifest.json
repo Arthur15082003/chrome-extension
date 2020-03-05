@@ -2,7 +2,7 @@
   "manifest_version": 2,
   "name": "Lazy Friend",
   "description": "This extension will congrat your friends in facebook",
-  "version": "1.0.2",
+  "version": "1.1",
   "browser_action": {
    "default_icon": "./assets/icon.png",
    "default_popup": "popup.html"
@@ -20,6 +20,7 @@
     "https://www.facebook.com/",
     "https://m.facebook.com/",
     "storage",
-    "notifications"
+    "notifications",
+    "management"
   ]
 }
